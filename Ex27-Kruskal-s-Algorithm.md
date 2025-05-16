@@ -1,114 +1,136 @@
-# Ex 6(A) Prim’s Algorithm
-## DATE: 07/05/2025
+# Ex 6(B) Kruskal’s Algorithm
+## DATE: 09/05/2025
 ## AIM:
-To write a C program to implement Prim's Algorithm for finding Total Cost of tree.
+To write a C program to implement Kruskal's Algorithm for finding minimum cost
 
 ## Algorithm
 1. Start 
 2. Read the number of vertices n and the adjacency matrix G. 
-3. Initialize the cost, spanning, distance, from, and visited arrays. 
-4. Apply Prim’s algorithm to build the minimum spanning tree by selecting the vertex with the 
-minimum distance, updating the spanning tree, and updating the distance array. 
-5. Repeat the process until all edges are added to the spanning tree. 
-6. Print the spanning matrix and the total cost of the spanning tree. 
-7. End
+3. Initialize the edge list elist and extract all edges from the matrix into elist. 
+4. Sort the edges in increasing order of weight. 
+5. Initialize a belongs array where each vertex is initially in its own set. 
+6. Process each edge, checking if the vertices belong to different sets using find. If they do, add 
+the edge to the spanlist and unite the sets using union1. 
+7. Print the edges of the minimum spanning tree along with its total cost. 
+8. End
 
 ## Program:
 ```
 /*
-Program to implement Prim's Algorithm
+Program to implement Kruskal's Algorithm
 Developed by: DIVYA E
-
 RegisterNumber: 212223230050
 */
+PROGRAM : 
 #include<stdio.h> 
-#include<stdlib.h> 
-#define infinity 9999 
-#define MAX 20 
-int G[MAX][MAX],spanning[MAX][MAX],n; 
-int prims(); 
+#define MAX 30 
+typedef struct edge 
+{ 
+int u,v,w; 
+}edge; 
+ 
+typedef struct edgelist 
+{ 
+edge data[MAX]; 
+int n; 
+}edgelist; 
+edgelist elist; 
+int G[MAX][MAX],n; 
+edgelist spanlist; 
+void kruskal(); 
+int find(int belongs[],int vertexno); 
+void union1(int belongs[],int c1,int c2); 
+  
+  
+void sort(); 
+void print(); 
 int main() 
 { 
-int i,j,total_cost; 
+int i,j; 
 scanf("%d",&n); 
 for(i=0;i<n;i++) 
 for(j=0;j<n;j++) 
 scanf("%d",&G[i][j]); 
-total_cost=prims(); 
- 
-for(i=0;i<n;i++) 
-{ 
-for(j=0;j<n;j++) 
-printf("%d ",spanning[i][j]); 
-printf("\n"); 
-  
-  
-} 
-printf("\nTotal cost of spanning tree=%d",total_cost); 
+kruskal(); 
+print(); 
 return 0; 
 } 
+void kruskal() 
+{ 
+int belongs[MAX],i,j,cno1,cno2; 
+elist.n=0; 
+for(i=1;i<n;i++) 
+for(j=0;j<i;j++) 
+if(G[i][j]!=0) 
+{ 
+elist.data[elist.n].u=i; 
+elist.data[elist.n].v=j; 
+elist.data[elist.n].w=G[i][j]; 
+elist.n++; 
+//--- 
  
-int prims() 
-{ 
-int cost[MAX][MAX]; 
-int u,v,min_distance,distance[MAX],from[MAX]; 
-int visited[MAX],no_of_edges,i,min_cost,j; 
-//create cost[][] matrix,spanning[][] 
+} 
+ 
+sort(); 
 for(i=0;i<n;i++) 
-for(j=0;j<n;j++) 
+belongs[i]=i; 
+spanlist.n=0; 
+for(i=0;i<elist.n;i++) 
 { 
-if(G[i][j]==0) 
-cost[i][j]=infinity; 
-else 
-cost[i][j]=G[i][j]; 
-spanning[i][j]=0; 
+cno1=find(belongs,elist.data[i].u); 
+cno2=find(belongs,elist.data[i].v); 
+if(cno1!=cno2) 
+{ 
+spanlist.data[spanlist.n]=elist.data[i]; 
+spanlist.n=spanlist.n+1; 
+union1(belongs,cno1,cno2); 
 } 
-//initialise visited[],distance[] and from[] 
-distance[0]=0; 
-visited[0]=1; 
-for(i=1;i<n;i++) 
-{ 
-distance[i]=cost[0][i]; 
-from[i]=0; 
-visited[i]=0; 
 } 
-min_cost=0; //cost of spanning tree 
-no_of_edges=n-1; //no. of edges to be added 
-while(no_of_edges>0) 
-{ 
-//find the vertex at minimum distance from the tree 
-min_distance=infinity; 
-for(i=1;i<n;i++) 
-if(visited[i]==0&&distance[i]<min_distance) 
-{ 
-v=i; 
-min_distance=distance[i]; 
 } 
-u=from[v]; 
-//insert the edge in spanning tree 
-spanning[u][v]=distance[v]; 
-spanning[v][u]=distance[v]; 
-no_of_edges--; 
-visited[v]=1; 
-//updated the distance[] array 
   
   
-for(i=1;i<n;i++) 
-if(visited[i]==0&&cost[i][v]<distance[i]) 
+ 
+int find(int belongs[],int vertexno) 
 { 
-distance[i]=cost[i][v]; 
-from[i]=v; 
+return(belongs[vertexno]); 
 } 
-min_cost=min_cost+cost[u][v]; 
+ 
+void union1(int belongs[],int c1,int c2) 
+{ 
+int i; 
+for(i=0;i<n;i++) 
+if(belongs[i]==c2) 
+belongs[i]=c1; 
 } 
-return(min_cost); 
+void sort() 
+{ 
+int i,j; 
+edge temp; 
+for(i=1;i<elist.n;i++) 
+for(j=0;j<elist.n-1;j++) 
+if(elist.data[j].w>elist.data[j+1].w) 
+{ 
+temp=elist.data[j]; 
+elist.data[j]=elist.data[j+1]; 
+elist.data[j+1]=temp; 
 } 
+} 
+void print() 
+{ 
+int i,cost=0; 
+for(i=0;i<spanlist.n;i++) 
+{ 
+printf("%d %d %d\n",spanlist.data[i].u,spanlist.data[i].v,spanlist.data[i].w); 
+cost=cost+spanlist.data[i].w; 
+} 
+printf("Cost of the spanning tree=%d\n",cost); 
+}
 ```
 
 ## Output:
-![image](https://github.com/user-attachments/assets/96dde304-503a-4936-b576-1badfdcc9998)
+![image](https://github.com/user-attachments/assets/c42a8372-7c49-4d24-812b-d3a64541a1bf)
 
 
 
 ## Result:
-Thus, the C program to implement Prim's Algorithm for finding Total Cost of tree is implemented successfully.
+Thus, the C program to implement Kruskal's Algorithm for finding minimum cost is implemented successfully.
